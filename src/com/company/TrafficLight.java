@@ -41,6 +41,7 @@ public class TrafficLight {
                 }
             }
         }
+        
 
         return roadSituation;
     }
