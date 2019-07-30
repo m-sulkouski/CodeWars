@@ -1,10 +1,14 @@
 package codewars.m_sulkouski.github.com;
 
+import javafx.scene.effect.Light;
+
+import java.util.LinkedList;
+
 public class TrafficLight {
-    private static int carPosition;
+
 
     public static void main(String[] args) {
-        String[] roadSituation = trafficLights("C...R............G......", 40);
+        String[] roadSituation = trafficLights("C...R............G......", 10);
         for (String s : roadSituation) {
             System.out.println(s);
         }
@@ -12,75 +16,124 @@ public class TrafficLight {
 
     public static String[] trafficLights(String road, int n) {
         int elapsedTime = 0;                                                    //Time elapsed from last light switch (G to R or R to G
+        String[] roadSituation = new String[n + 1];
+        roadSituation[elapsedTime] = road;
         road = road.replace('C', '.');
-        String currentLights = road;
-        String[] roadSituation = new String[n];
-        roadSituation[elapsedTime] = moveCar(road);
 
-        for (elapsedTime = 1; elapsedTime < n; elapsedTime++) {
-            currentLights = currentLights.replace("C",".");
-            if((elapsedTime % 6 == 5)) {
-                currentLights = roadSituation[elapsedTime - 1];
-                roadSituation[elapsedTime] = switchYellowLights(road);
-            }
-            else if(elapsedTime %6 == 0){
-                currentLights = switchRedGreenLights(currentLights,elapsedTime);
-                roadSituation[elapsedTime] = currentLights;
-            }
-            else {
-                roadSituation[elapsedTime] = currentLights;
-            }
+        Road simulatedRoad = new Road(road);
 
-            if (carPosition < roadSituation[elapsedTime].length() - 1) {
-                if(roadSituation[elapsedTime].charAt(carPosition + 1) != 'R') {
-                    carPosition++;
-                    roadSituation[elapsedTime] = moveCar(roadSituation[elapsedTime]);
-                }
-                else if(roadSituation[elapsedTime].charAt(carPosition + 1) == 'R') {
-                    roadSituation[elapsedTime] = moveCar(roadSituation[elapsedTime]);
-                }
-            }
+        for (elapsedTime = 1; elapsedTime <= n; elapsedTime++) {
+            roadSituation[elapsedTime] = simulatedRoad.simulateRoadTraffic();
         }
 
 
         return roadSituation;
     }
 
+}
 
-    private static String switchYellowLights(String lights) {
-        char[] ch = lights.toCharArray();
-        for (int i = 0; i < ch.length; i++) {
-            if (ch[i] == 'G' || ch[i] == 'R') {
-                ch[i] = 'O';
-            }
-        }
-        return String.valueOf(ch);
-    }
+class Road {
+    private char[] road;
+    private LinkedList<Lights> lights = new LinkedList<>();
+    private char[] roadSection;
+    private int carPosition;
 
-    private static String moveCar(String simulatedLights) {
-        char[] ch = simulatedLights.toCharArray();
-        if (carPosition == ch.length)
-            return simulatedLights;
-
-        ch[carPosition] = 'C';
-
-        return String.valueOf(ch);
-    }
-
-    private static String switchRedGreenLights(String road, int currentTimer) {
-
-        char[] ch = road.toCharArray();
-        for (int i = 0; i < road.length(); i++) {
-            if(ch[i] == 'R') {
-                ch[i] = 'G';
-            }
-            else if(ch[i] == 'G') {
-                ch[i] = 'R';
+    public Road(String road) {
+        char[] template = {'R', 'G', 'Y'};
+        for (char ch : road.toCharArray()) {                                // Generating list of lights based on initial road lights pattern
+            for (int i = 0; i < template.length; i++) {
+                if (template[i] == 'N') {
+                    continue;
+                }
+                if (ch == template[i]) {
+                    Lights light = new Lights(ch,road);
+                    lights.add(light);
+                    template[i] = 'N';
+                }
             }
         }
 
-        return String.valueOf(ch);
+        roadSection = new char[road.length()];
+        clearRoadSection();
+        this.carPosition = 0;
     }
 
+    private void clearRoadSection() {
+        for (int i = 0; i < roadSection.length; i++) {
+            roadSection[i] = '.';
+        }
+    }
+
+    public String simulateRoadTraffic() {
+        clearRoadSection();
+        for (Lights obj : this.lights) {               //simulate 1 second passed for lights
+            obj.passTime();
+            obj.simulateLightsControl();
+        }
+
+
+        for (Lights obj : this.lights) {                //add lights to the road
+            for (int k : obj.getLocations()) {
+                roadSection[k] = obj.getValue();
+            }
+        }
+
+        if (this.carPosition < roadSection.length - 1) {
+            if (roadSection[carPosition + 1] == 'G' || roadSection[carPosition + 1] == '.') {
+                carPosition++;
+            }
+            roadSection[carPosition] = 'C';
+        }
+
+        return String.valueOf(roadSection);
+    }
 
 }
+
+class Lights {
+    private int[] locations;               // contains location for all lights
+    private int timeElapsed;               // time elapsed from the initialization
+    private char value;                    // current value of group (R for red, G for green, O for orange
+
+    public Lights(char value, String road) {
+        int counter = 0;
+        this.value = value;
+        char[] ch = road.toCharArray();
+        for (char c : ch) {
+            if (c == this.value) {
+                counter++;
+            }
+        }
+        locations = new int[counter];
+
+        for (int i = 0, k = 0; i < ch.length; i++) {
+            if (ch[i] == this.value) {
+                locations[k++] = i;
+            }
+        }
+    }
+
+    public int[] getLocations() {
+        return locations;
+    }
+
+    public void passTime() {
+        this.timeElapsed++;
+    }
+
+    public char getValue() {
+        return value;
+    }
+
+
+    public void simulateLightsControl() {
+        if (this.timeElapsed == 1 && this.value == 'O') {
+            this.value = 'R';
+            this.timeElapsed = 0;
+        } else if (this.timeElapsed == 5) {
+            this.value = this.value == 'R' ? 'G' : 'O';
+            this.timeElapsed = 0;
+        }
+    }
+}
+
