@@ -1,6 +1,6 @@
 package codewars.m_sulkouski.github.com;
 
-import javafx.scene.effect.Light;
+
 
 import java.util.LinkedList;
 
@@ -25,8 +25,6 @@ public class TrafficLight {
         for (elapsedTime = 1; elapsedTime <= n; elapsedTime++) {
             roadSituation[elapsedTime] = simulatedRoad.simulateRoadTraffic();
         }
-
-
         return roadSituation;
     }
 
@@ -87,7 +85,6 @@ class Road {
 
         return String.valueOf(roadSection);
     }
-
 }
 
 class Lights {
