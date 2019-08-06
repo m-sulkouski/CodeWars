@@ -9,13 +9,16 @@ package codewars.m_sulkouski.github.com;
 //        Your task is to implement a function that would take the morse code as input and return a decoded human-readable string.
 
 
+import morse_code_decoderii.codewars.m_sulkouski.github.com.MorseCodeDecoder_II;
+
 public class MorseCodeDecoder {
     public static void main(String[] args) {
-        String decodedMessage = decode("   .   .");
+        String decodedMessage = decode("···· · −·−− ·−−− ··− −·· ·");
         System.out.println(decodedMessage);
     }
 
     public static String decode(String codedText) {
+        codedText = (codedText);
         String[] codedPhrase = codedText.trim().split("   ");
         String[] currentSymbols;
         StringBuilder decodedPhrase = new StringBuilder();
@@ -30,28 +33,36 @@ public class MorseCodeDecoder {
             decodedPhrase.append(" ");
         }
 
-        return decodedPhrase.toString().trim();
+        return decodedPhrase.toString();
     }
-
-
 }
 
 class MorseCode {
     static String get(String symbol) {
+        String decodedSymbol = "";
         switch (symbol) {
-            case "....":
-                return "H";
-            case ".":
-                return "E";
-            case "-.--":
-                return "Y";
-            case ".---":
-                return "J";
-            case "..-":
-                return "U";
-            case "-..":
-                return "D";
+            case "····":
+                decodedSymbol = "H";
+                break;
+            case "·":
+                decodedSymbol = "E";
+                break;
+            case "-·--":
+                decodedSymbol = "Y";
+                break;
+            case "·---":
+                decodedSymbol = "J";
+                break;
+            case "··-":
+                decodedSymbol = "U";
+                break;
+            case "-··":
+                decodedSymbol = "D";
+                break;
+            default:
+                decodedSymbol = "A";
+                break;
         }
-        return "A";
+        return decodedSymbol;
     }
 }
